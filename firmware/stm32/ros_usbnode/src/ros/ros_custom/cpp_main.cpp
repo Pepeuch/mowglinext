@@ -30,6 +30,8 @@
 #include "blademotor.h"
 #include "ultrasonic_sensor.h"
 #include "stm32f_board_hal.h"
+#include "hal/hal_gpio.h"
+#include "board_config.h"
 #include "nbt.h"
 
 // USB CDC
@@ -293,7 +295,9 @@ void usb_cdc_transmit(const uint8_t *buf, size_t len)
 extern "C" void chatter_handler()
 {
     if (NBT_handler(&led_nbt)) {
-        HAL_GPIO_TogglePin(LED_GPIO_PORT, LED_PIN);
+        static bool led_state = false;
+        led_state = !led_state;
+        hal_gpio_write(BOARD_STATUS_LED, led_state);
 
         if (reboot_flag) {
             NVIC_SystemReset();

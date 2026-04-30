@@ -218,7 +218,7 @@ void I2C_Accelerometer_Setup(void)
 
     /* Reboot - reset all settings */
     lis3dh_boot_set(&dev_ctx, 1);
-    HAL_Delay(50);
+    hal_delay_ms(50);
 
     /* Enable Block Data Update. */
     lis3dh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

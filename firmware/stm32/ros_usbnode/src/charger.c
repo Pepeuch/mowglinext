@@ -19,6 +19,7 @@
 #include "charger.h"
 #include "hal/hal_pwm.h"
 #include "board_config.h"
+#include "hal/hal_storage.h"
 /******************************************************************************
  * Module Preprocessor Constants
  *******************************************************************************/
@@ -202,8 +203,8 @@ void ChargeController(void)
           charge_current_offset.f = current_without_offset;
           // Writes a data in a RTC Backup data Register 3&4
           HAL_PWR_EnableBkUpAccess();
-          HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR3, charge_current_offset.u[0]);    
-          HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR4, charge_current_offset.u[1]);   
+          hal_storage_write_u32(RTC_BKP_DR3, charge_current_offset.u[0]);
+          hal_storage_write_u32(RTC_BKP_DR4, charge_current_offset.u[1]);
           HAL_PWR_DisableBkUpAccess(); 
           HAL_GPIO_WritePin(TF4_GPIO_PORT, TF4_PIN, 1); /* Power on the battery  Powerbus */
           charger_state = CHARGER_STATE_CHARGING_CC;
@@ -280,8 +281,8 @@ void ChargeController(void)
 
     // Writes a data in a RTC Backup data Register 1
     HAL_PWR_EnableBkUpAccess();
-    HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR1, ampere_acc.u[0]);    
-    HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR2, ampere_acc.u[1]);   
+    hal_storage_write_u32(RTC_BKP_DR1, ampere_acc.u[0]);
+    hal_storage_write_u32(RTC_BKP_DR2, ampere_acc.u[1]); 
     HAL_PWR_DisableBkUpAccess(); 
 
     chargecontrol_is_charging = charger_state;

@@ -18,6 +18,7 @@
 #include "adc.h"
 #include <math.h>
 #include "hal/hal_adc.h"
+#include "hal/hal_storage.h"
 /******************************************************************************
  * Module Preprocessor Constants
  *******************************************************************************/
@@ -243,13 +244,11 @@ void ADC_Charging_Init(void)
     /* USER CODE BEGIN RTC_MspInit 1 */
     HAL_PWR_EnableBkUpAccess();
 
-    ampere_acc.u[0] = HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR1);
-    ampere_acc.u[1] = HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR2);
-
-    charge_current_offset.u[0] = HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR3);
-    charge_current_offset.u[1] = HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR4);
+    ampere_acc.u[0] = hal_storage_read_u32(RTC_BKP_DR1);
+    ampere_acc.u[1] = hal_storage_read_u32(RTC_BKP_DR2);
+    charge_current_offset.u[0] = hal_storage_read_u32(RTC_BKP_DR3);
+    charge_current_offset.u[1] = hal_storage_read_u32(RTC_BKP_DR4);
 }
-
 /**
  * @brief ADC Input Function
  *

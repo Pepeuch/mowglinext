@@ -17,6 +17,7 @@
 #include "perimeter.h"
 #include "adc.h"
 #include <math.h>
+#include "hal/hal_adc.h"
 /******************************************************************************
  * Module Preprocessor Constants
  *******************************************************************************/
@@ -263,13 +264,13 @@ void ADC_input(void)
     float l_fTmp;
 
     /* Snapshot volatile ADC values under interrupt lock to avoid torn reads */
-    __disable_irq();
-    uint16_t raw_battery       = adc_u16BatteryVoltage;
-    uint16_t raw_charger       = adc_u16ChargerVoltage;
-    uint16_t raw_current       = adc_u16Current;
-    uint16_t raw_chargerInput  = adc_u16ChargerInputVoltage;
-    uint16_t raw_ntc           = adc_u16Input_NTC;
-    __enable_irq();
+    hal_adc_charging_snapshot_t raw = hal_adc_get_charging_snapshot();
+
+    uint16_t raw_battery      = raw.battery_voltage_raw;
+    uint16_t raw_charger      = raw.charge_voltage_raw;
+    uint16_t raw_current      = raw.charge_current_raw;
+    uint16_t raw_chargerInput = raw.charger_input_voltage_raw;
+    uint16_t raw_ntc          = raw.ntc_raw;
 
     /* battery volatge calculation */
     l_fTmp = ((float)raw_battery / 4095.0f) * 3.3f * 10.09 + 0.6f;

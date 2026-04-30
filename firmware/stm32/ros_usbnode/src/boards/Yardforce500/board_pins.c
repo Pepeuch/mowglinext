@@ -15,5 +15,7 @@ const hal_pin_t BOARD_TF4_SWITCH = {TF4_GPIO_PORT, TF4_PIN};
 const hal_pwm_t BOARD_PWM_CHARGE = { &TIM1_Handle, TIM_CHANNEL_1 };
 const hal_pwm_t BOARD_PWM_BEEPER = { &TIM3_Handle, TIM_CHANNEL_4 };
 const hal_pwm_t BOARD_PWM_BUZZER = { &TIM4_Handle, TIM_CHANNEL_3 };
+const hal_pin_t BOARD_SOFT_I2C_SCL = {SOFT_I2C_SCL_PORT, SOFT_I2C_SCL_PIN};
+const hal_pin_t BOARD_SOFT_I2C_SDA = {SOFT_I2C_SDA_PORT, SOFT_I2C_SDA_PIN};
 
 #endif 

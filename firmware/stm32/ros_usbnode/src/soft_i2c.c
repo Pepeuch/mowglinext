@@ -17,7 +17,8 @@
 #include "stm32f_board_hal.h"
 #include "soft_i2c.h"
 #include "board.h"
-
+#include "hal/hal_gpio.h"
+#include "board_config.h"
 
 
 //#define  SW_I2C_WAIT_TIME  25	//(11.0us)
@@ -56,66 +57,52 @@ void  __attribute__ ((optimize(0))) TIMER__Wait_us (uint32_t nCount)
 /* init soft i2c pins */
 void SW_I2C_Init(void)
 {
-    /* PB3, PB4 are used by the JTAG - we need to disable it, as we use SWD anyhow we dont need it */
-
 #if BOARD_YARDFORCE500_VARIANT_ORIG
-	// TODO: Check if some equivalent of all of this is needed for the STM32f4
-    RCC->APB2ENR |= RCC_APB2ENR_AFIOEN; // Enable A.F. clock
+    RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
 
-    if( (SW_I2C1_SDA_PIN == GPIO_PIN_3) || (SW_I2C1_SCL_PIN == GPIO_PIN_3)){
-        AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE; // JTAG is disabled, SW0 is enabled
-    }
-    else
-    {
-        AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_NOJNTRST; // JTAG is disabled
+    if ((SW_I2C1_SDA_PIN == GPIO_PIN_3) || (SW_I2C1_SCL_PIN == GPIO_PIN_3)) {
+        AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE;
+    } else {
+        AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_NOJNTRST;
     }
 #endif
 
-	SOFT_I2C_GPIO_CLK_ENABLE();
+    SOFT_I2C_GPIO_CLK_ENABLE();
 
-    GPIO_InitTypeDef GPIO_InitStruct;
-    
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-
-
-    GPIO_InitStruct.Pin   = SW_I2C1_SCL_PIN;
-    HAL_GPIO_Init(SW_I2C1_SCL_GPIO, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin   = SW_I2C1_SDA_PIN;
-    HAL_GPIO_Init(SW_I2C1_SDA_GPIO, &GPIO_InitStruct);    
+    // ✅ NOUVEAU HAL PROPRE
+    hal_gpio_configure(BOARD_SOFT_I2C_SCL, HAL_GPIO_MODE_OUTPUT_OD, HAL_GPIO_PULL_UP);
+    hal_gpio_configure(BOARD_SOFT_I2C_SDA, HAL_GPIO_MODE_OUTPUT_OD, HAL_GPIO_PULL_UP);
 }
 
 /* de-init soft i2c pins */
 void SW_I2C_DeInit(void)
 { 
-   HAL_GPIO_DeInit(SW_I2C1_SCL_GPIO, SW_I2C1_SCL_PIN);
-   HAL_GPIO_DeInit(SW_I2C1_SDA_GPIO, SW_I2C1_SDA_PIN);
+   hal_gpio_deinit(BOARD_SOFT_I2C_SCL);
+   hal_gpio_deinit(BOARD_SOFT_I2C_SDA);
 }
 
 // SDA High
 void sda_high(void)
 { 
-    HAL_GPIO_WritePin(SW_I2C1_SDA_GPIO, SW_I2C1_SDA_PIN, GPIO_PIN_SET);
+    hal_gpio_write(BOARD_SOFT_I2C_SDA, true);
 }
 
 // SDA low
 void sda_low(void)
 {
-    HAL_GPIO_WritePin(SW_I2C1_SDA_GPIO, SW_I2C1_SDA_PIN, GPIO_PIN_RESET);
+    hal_gpio_write(BOARD_SOFT_I2C_SDA, false);
 }
 
 // SCL High
 void scl_high(void)
 {   
-    HAL_GPIO_WritePin(SW_I2C1_SCL_GPIO, SW_I2C1_SCL_PIN, GPIO_PIN_SET);
+    hal_gpio_write(BOARD_SOFT_I2C_SCL, true);
 }
 
 // SCL low
 void scl_low(void)
 {    
-    HAL_GPIO_WritePin(SW_I2C1_SCL_GPIO, SW_I2C1_SCL_PIN, GPIO_PIN_RESET);
+    hal_gpio_write(BOARD_SOFT_I2C_SCL, false);
 }
 
 void sda_out(uint8_t out)
@@ -132,54 +119,22 @@ void sda_out(uint8_t out)
 
 void sda_in_mode(void)
 {
-  //  debug_printf("sda_in_mode()\r\n");
-    GPIO_InitTypeDef GPIO_InitStruct;
-
-    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-    GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;	//IPD->IPU
-	GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Pin   = SW_I2C1_SDA_PIN;
-    HAL_GPIO_Init(SW_I2C1_SDA_GPIO, &GPIO_InitStruct);  
+    hal_gpio_configure(BOARD_SOFT_I2C_SDA, HAL_GPIO_MODE_INPUT, HAL_GPIO_PULL_UP);
 }
 
 void sda_out_mode(void)
 {
-    //debug_printf("sda_out_mode()\r\n");
-
-    GPIO_InitTypeDef GPIO_InitStruct;
-    
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-
-
-    GPIO_InitStruct.Pin   = SW_I2C1_SDA_PIN;
-    HAL_GPIO_Init(SW_I2C1_SDA_GPIO, &GPIO_InitStruct);  
+    hal_gpio_configure(BOARD_SOFT_I2C_SDA, HAL_GPIO_MODE_OUTPUT_OD, HAL_GPIO_PULL_UP);
 }
 
 void scl_in_mode(void)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
-
-    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-    GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;	//IPD->IPU
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-
-    GPIO_InitStruct.Pin   = SW_I2C1_SCL_PIN;
-    HAL_GPIO_Init(SW_I2C1_SCL_GPIO, &GPIO_InitStruct);
-  
+    hal_gpio_configure(BOARD_SOFT_I2C_SCL, HAL_GPIO_MODE_INPUT, HAL_GPIO_PULL_UP);
 }
 
 void scl_out_mode(void)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
-
-    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD;		// error point GPIO_Mode_Out_PP	
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-
-    GPIO_InitStruct.Pin   = SW_I2C1_SCL_PIN;
-    HAL_GPIO_Init(SW_I2C1_SCL_GPIO, &GPIO_InitStruct);
+    hal_gpio_configure(BOARD_SOFT_I2C_SCL, HAL_GPIO_MODE_OUTPUT_OD, HAL_GPIO_PULL_UP);
 }
 
 void i2c_clk_data_out(void)
@@ -309,12 +264,12 @@ void i2c_send_ack(void)
 /* external functions */
 uint8_t SW_I2C_ReadVal_SDA(void)
 {    
-    return HAL_GPIO_ReadPin(SW_I2C1_SDA_GPIO, SW_I2C1_SDA_PIN);       
+    return hal_gpio_read(BOARD_SOFT_I2C_SDA);       
 }
 
 uint8_t SW_I2C_ReadVal_SCL(void)
 { 
-    return HAL_GPIO_ReadPin(SW_I2C1_SCL_GPIO, SW_I2C1_SCL_PIN);    
+    return hal_gpio_read(BOARD_SOFT_I2C_SCL);    
 }
 
 void SW_I2C_Write_Data(uint8_t data)

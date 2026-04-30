@@ -18,6 +18,8 @@
 #include "adc.h"
 #include "charger.h"
 #include "hal/hal_pwm.h"
+#include "hal/hal_gpio.h"
+#include "hal/hal_time.h"
 #include "board_config.h"
 #include "hal/hal_storage.h"
 /******************************************************************************
@@ -199,14 +201,14 @@ void ChargeController(void)
         chargecontrol_pwm_val = 0;
 
         /* wait 100ms to read current */
-        if( (HAL_GetTick() - timestamp) > 100){
+        if( (hal_millis() - timestamp) > 100){
           charge_current_offset.f = current_without_offset;
           // Writes a data in a RTC Backup data Register 3&4
           HAL_PWR_EnableBkUpAccess();
           hal_storage_write_u32(RTC_BKP_DR3, charge_current_offset.u[0]);
           hal_storage_write_u32(RTC_BKP_DR4, charge_current_offset.u[1]);
           HAL_PWR_DisableBkUpAccess(); 
-          HAL_GPIO_WritePin(TF4_GPIO_PORT, TF4_PIN, 1); /* Power on the battery  Powerbus */
+          hal_gpio_write(BOARD_TF4_SWITCH, true);/* Power on the battery  Powerbus */
           charger_state = CHARGER_STATE_CHARGING_CC;
         }
 
@@ -268,8 +270,8 @@ void ChargeController(void)
        
         if (chargerInputVoltage >= 30.0 ) {
             charger_state = CHARGER_STATE_CONNECTED;
-            HAL_GPIO_WritePin(TF4_GPIO_PORT, TF4_PIN, 0); /* Power off the battery  Powerbus */
-            timestamp = HAL_GetTick();
+            hal_gpio_write(BOARD_TF4_SWITCH, false);/* Power off the battery  Powerbus */
+            timestamp = hal_millis();
         }
         chargecontrol_pwm_val = 0;
         break;

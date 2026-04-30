@@ -24,6 +24,7 @@
 #include "board.h"
 #include "adc.h"
 #include "hal/hal_gpio.h"
+#include "hal/hal_time.h"
 #include "board_config.h"
 
 #include "drivemotor.h"
@@ -297,7 +298,7 @@ void DRIVEMOTOR_App_10ms(void)
             case OPENMOWER_STATUS_MOWING:
                 /*hit something goes back */
                 drivemotor_eState = DRIVEMOTOR_BACKWARD;
-                l_u32Timestamp = HAL_GetTick();
+                l_u32Timestamp = hal_millis();
                 break;
             case OPENMOWER_STATUS_DOCKING:
                 /* Get voltage from dock, stop the mower*/
@@ -308,7 +309,7 @@ void DRIVEMOTOR_App_10ms(void)
                 else
                 { /*hit something goes back */
                     drivemotor_eState = DRIVEMOTOR_BACKWARD;
-                    l_u32Timestamp = HAL_GetTick();
+                    l_u32Timestamp = hal_millis();
                 }
 
                 break;
@@ -331,10 +332,10 @@ void DRIVEMOTOR_App_10ms(void)
         drivemotor_prepareMsg(100, 100, 0, 0); /* set to -0.33m/s  */
         hal_uart_tx_dma(&DRIVE_UART, (uint8_t *)drivemotor_pu8RqstMessage, DRIVEMOTOR_LENGTH_RQST_MSG);
 
-        if ((HAL_GetTick() - l_u32Timestamp) > 2000)
+        if ((hal_millis() - l_u32Timestamp) > 2000)
         {
             drivemotor_eState = DRIVEMOTOR_WAIT;
-            l_u32Timestamp = HAL_GetTick();
+            l_u32Timestamp = hal_millis();
         }
 
         break;
@@ -345,7 +346,7 @@ void DRIVEMOTOR_App_10ms(void)
         drivemotor_prepareMsg(0, 0, 0, 0);
         hal_uart_tx_dma(&DRIVE_UART, (uint8_t *)drivemotor_pu8RqstMessage, DRIVEMOTOR_LENGTH_RQST_MSG);
 
-        if ((HAL_GetTick() - l_u32Timestamp) > 1000)
+        if ((hal_millis() - l_u32Timestamp) > 1000)
         {
             drivemotor_eState = DRIVEMOTOR_RUN;
         }

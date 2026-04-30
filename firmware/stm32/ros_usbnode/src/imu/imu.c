@@ -22,6 +22,7 @@
 #include "imu/lis3mdl.h"
 #include "i2c.h"
 #include "main.h"
+#include "hal/hal_time.h"
 
 IMU_ReadAccelerometerRaw imuReadAccelerometerRaw=NULL;
 IMU_ReadGyroRaw imuReadGyroRaw=NULL;
@@ -117,8 +118,8 @@ void IMU_Init() {
   imuReadGyroRaw=NULL;
   imuReadMagRaw=NULL;
 
-  uint32_t l_u32Timestamp = HAL_GetTick();
-while (imuReadAccelerometerRaw == NULL && ((HAL_GetTick() - l_u32Timestamp) < 20000) )
+  uint32_t l_u32Timestamp = hal_millis();
+while (imuReadAccelerometerRaw == NULL && ((hal_millis() - l_u32Timestamp) < 20000))
 {
   #ifndef DISABLE_LSM6
     if (LSM6_TestDevice()) {
@@ -145,7 +146,7 @@ while (imuReadAccelerometerRaw == NULL && ((HAL_GetTick() - l_u32Timestamp) < 20
     }
   #endif
 
-  HAL_Delay(20);
+  hal_delay_ms(20);
 }
 
 if(imuReadAccelerometerRaw == NULL){

@@ -22,6 +22,7 @@
 #include "stm32f_board_hal.h"
 #include "i2c_lis3dh.h"
 #include "hal/hal_i2c.h"
+#include "hal/hal_time.h"
 
 I2C_HandleTypeDef I2C_Handle;
 static hal_i2c_t LIS3DH_I2C_BUS = { &I2C_Handle };
@@ -110,7 +111,7 @@ void I2C_ReadAccelerometer(float *x, float *y, float *z)
     lis3dh_xl_data_ready_get(&dev_ctx, &reg.byte);        
     while (!reg.byte && max_tries) {            
       lis3dh_xl_data_ready_get(&dev_ctx, &reg.byte);        
-      HAL_Delay(1);
+      hal_delay_ms(1);
       max_tries--;
     }    
     if (reg.byte) {            
@@ -176,7 +177,7 @@ uint8_t I2C_Acclerometer_TestDevice(void)
     dev_ctx.write_reg = I2C_platform_write;
     dev_ctx.read_reg = I2C_platform_read;
     dev_ctx.handle = &I2C_Handle;
-    HAL_Delay(50);   // wait for bootup
+    hal_delay_ms(50);   // wait for bootup
     /* Check device ID */
     lis3dh_device_id_get(&dev_ctx, &reg.byte);    
     if (reg.byte != LIS3DH_ID) {

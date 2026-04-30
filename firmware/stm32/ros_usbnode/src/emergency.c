@@ -138,7 +138,7 @@ void EmergencyController(void)
     bool play_button = !hal_gpio_read(BOARD_PLAY_BUTTON);
     uint8_t accelerometer_int_triggered = Emergency_LowZAccelerometer();
 
-    uint32_t now = HAL_GetTick();
+    uint32_t now = hal_millis();
     static uint32_t l_u32timestamp = 0;
 
 #ifdef EMERGENCY_DEBUG
@@ -286,8 +286,8 @@ void EmergencyController(void)
         play_button_started = 0;
     }
     /* play buzzer when emergency every 5s*/
-    if(emergency_state  && ((HAL_GetTick()-l_u32timestamp) > 5000)){
-        l_u32timestamp = HAL_GetTick();
+    if (emergency_state && ((hal_millis() - l_u32timestamp) > 5000)) {
+        l_u32timestamp = hal_millis();
         do_chirp=5;
     }
 }

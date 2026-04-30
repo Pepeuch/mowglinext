@@ -7,18 +7,19 @@
 
 #include "stm32f_board_hal.h"
 #include "nbt.h"
+#include "hal/hal_time.h"
 
 //NBT - Non Blocking Timer
 void NBT_init(nbt_t * nbt, uint32_t interval)
 {
 	nbt->timeout = interval;
-	nbt->previousMillis = HAL_GetTick();
+	nbt->previousMillis = hal_millis();
 }
 
 bool NBT_handler(nbt_t * nbt)
 {
-	if(HAL_GetTick()-nbt->previousMillis>nbt->timeout){
-		nbt->previousMillis = HAL_GetTick();
+	if(hal_millis()-nbt->previousMillis>nbt->timeout){
+		nbt->previousMillis = hal_millis();
 		return true;
 	}
 

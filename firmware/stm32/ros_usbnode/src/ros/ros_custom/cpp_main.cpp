@@ -13,7 +13,7 @@
  *   - ros::NodeHandle replaced by mowgli_comms COBS layer
  *   - USB CDC RX feeds mowgli_comms_process_rx() instead of ringbuffer
  *   - Packet send uses mowgli_comms_send_*() convenience wrappers
- *   - cmd_vel timeout uses HAL_GetTick() instead of nh.now()
+ *   - cmd_vel timeout uses hal_millis() instead of nh.now()
  *
  ******************************************************************************
  */
@@ -33,6 +33,7 @@
 #include "hal/hal_gpio.h"
 #include "board_config.h"
 #include "nbt.h"
+#include "hal/hal_time.h"
 
 // USB CDC
 #include "usbd_cdc_if.h"
@@ -138,7 +139,7 @@ static void on_heartbeat(const uint8_t *data, size_t len)
 
     const pkt_heartbeat_t *pkt = (const pkt_heartbeat_t *)data;
 
-    last_heartbeat_tick = HAL_GetTick();
+    last_heartbeat_tick = hal_millis();
 
     if (pkt->emergency_requested) {
         Emergency_SetState(1);
@@ -164,7 +165,7 @@ static void on_cmd_vel(const uint8_t *data, size_t len)
 
     const pkt_cmd_vel_t *pkt = (const pkt_cmd_vel_t *)data;
 
-    last_cmd_vel_tick = HAL_GetTick();
+    last_cmd_vel_tick = hal_millis();
 
     if (main_eOpenmowerStatus == OPENMOWER_STATUS_IDLE) {
         return;
@@ -326,7 +327,7 @@ extern "C" void motors_handler()
             DRIVEMOTOR_SetSpeedSigned(0, 0);
             blade_on_off = 0;
         } else {
-            const uint32_t cmd_vel_age_ms = HAL_GetTick() - snap_cmd_vel;
+            const uint32_t cmd_vel_age_ms = hal_millis() - snap_cmd_vel;
 
             if (cmd_vel_age_ms > 200u) {
                 /* Command-vel watchdog: zero motors if the host hasn't
@@ -343,7 +344,7 @@ extern "C" void motors_handler()
 
         // Heartbeat watchdog: if no heartbeat for HEARTBEAT_TIMEOUT_MS, emergency stop
         if (snap_heartbeat != 0 &&
-            (HAL_GetTick() - snap_heartbeat) > HEARTBEAT_TIMEOUT_MS) {
+            (hal_millis() - snap_heartbeat) > HEARTBEAT_TIMEOUT_MS) {
             Emergency_SetState(1);
         }
 
@@ -419,7 +420,7 @@ extern "C" void wheelTicks_handler(
     static int32_t prev_left_ticks  = 0;
     static int32_t prev_right_ticks = 0;
 
-    const uint32_t now_tick = HAL_GetTick();
+    const uint32_t now_tick = hal_millis();
     const uint16_t dt_ms    = (uint16_t)(now_tick - last_odom_tick);
     last_odom_tick = now_tick;
 
@@ -469,7 +470,7 @@ extern "C" void broadcast_handler()
         imu_pkt.type = PKT_ID_IMU;
 
         static uint32_t last_imu_tick = 0;
-        uint32_t now_tick = HAL_GetTick();
+        uint32_t now_tick = hal_millis();
         imu_pkt.dt_millis = (uint16_t)(now_tick - last_imu_tick);
         last_imu_tick = now_tick;
 
@@ -595,7 +596,7 @@ extern "C" void init_ROS()
     NBT_init(&motors_nbt,  MOTORS_NBT_TIME_MS);
     NBT_init(&blade_nbt,   BLADE_NBT_TIME_MS);
 
-    last_odom_tick      = HAL_GetTick();
+    last_odom_tick      = hal_millis();
     last_heartbeat_tick = 0;
     last_cmd_vel_tick   = 0;
 }

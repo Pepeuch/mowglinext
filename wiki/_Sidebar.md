@@ -4,6 +4,7 @@
 
 **Getting Started**
 - [Getting Started](Getting-Started)
+- [User Guide](User-Guide)
 - [Hardware Requirements](Getting-Started#hardware)
 - [DevContainer / Codespaces](Getting-Started#development-with-github-codespaces--devcontainer)
 - [Deployment](Deployment)
@@ -19,6 +20,10 @@
 - [GUI](GUI)
 - [Simulation](Simulation)
 - [E2E Testing](Simulation#end-to-end-e2e-test)
+
+**Design Notes**
+- [Onboarding Improvements](Design-Onboarding-Improvements)
+- [OpenMower Bridge](Design-OpenMower-Bridge)
 
 **Community**
 - [Contributing](Contributing)

@@ -17,6 +17,8 @@
 #include "board.h"
 #include "adc.h"
 #include "charger.h"
+#include "hal/hal_pwm.h"
+#include "board_config.h"
 /******************************************************************************
  * Module Preprocessor Constants
  *******************************************************************************/
@@ -153,7 +155,7 @@ static float charge_end_voltage=BAT_CHARGE_CUTOFF_VOLTAGE ;
 
 
     // Charge CH1/CH1N PWM Timer
-  TIM1->CCR1 = 0;  
+  hal_pwm_set(BOARD_PWM_CHARGE, 0);  
   HAL_TIM_PWM_Start(&TIM1_Handle, TIM_CHANNEL_1);
   HAL_TIMEx_PWMN_Start(&TIM1_Handle, TIM_CHANNEL_1);
   DB_TRACE(" * Charge Controler PWM Timers initialized\r\n");
@@ -288,8 +290,7 @@ void ChargeController(void)
     if (chargecontrol_pwm_val > 1350){
         chargecontrol_pwm_val = 1350;
     }
-    TIM1->CCR1 = chargecontrol_pwm_val;  
-    
+    hal_pwm_set(BOARD_PWM_CHARGE, chargecontrol_pwm_val);    
 }
 
 /******************************************************************************

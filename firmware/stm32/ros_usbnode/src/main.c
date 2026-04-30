@@ -23,6 +23,8 @@
 #include "hal/hal_gpio.h"
 #include "hal/hal_time.h"
 #include "hal/hal_uart.h"
+#include "hal/hal_pwm.h"
+#include "board_config.h"
 #include "main.h"
 // stm32 custom
 #include "board_config.h"
@@ -284,15 +286,15 @@ int main(void)
       // TODO
       if (do_chirp)
       {
-        TIM3_Handle.Instance->CCR4 = 10; // chirp on
-        TIM4_Handle.Instance->CCR3 = 10; // chirp on
+        hal_pwm_set(BOARD_PWM_BEEPER, 10); // chirp on
+        hal_pwm_set(BOARD_PWM_BUZZER, 10); // chirp on
         do_chirp = 0;
         do_chirp_duration_counter = 0;
       }
       if (do_chirp_duration_counter == 1)
       {
-        TIM3_Handle.Instance->CCR4 = 0; // chirp off
-        TIM4_Handle.Instance->CCR3 = 0; // chirp off
+        hal_pwm_set(BOARD_PWM_BEEPER, 0); // chirp off
+        hal_pwm_set(BOARD_PWM_BUZZER, 0); // chirp off
       }
       do_chirp_duration_counter++;
     }

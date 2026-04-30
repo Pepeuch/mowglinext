@@ -19,6 +19,9 @@
 #include "panel.h"
 #include "board.h"
 #include "main.h"
+#include "hal/hal_gpio.h"
+#include "hal/hal_time.h"
+#include "board_config.h"
 
 #define PANEL_LENGTH_INIT_MSG 22
 #define PANEL_LENGTH_RQST_MSG 18
@@ -184,13 +187,13 @@ void PANEL_Init(void)
     memset(Led_States, 0x0, LED_STATE_SIZE);       // all LEDs OFF
     // Initialize Panel Sequence
     PANEL_Send_Message(NULL, 0, 0xffff);
-    HAL_Delay(100);
+    hal_delay_ms(100);
     PANEL_Send_Message(NULL, 0, 0xfffe);
-    HAL_Delay(100);    
+    hal_delay_ms(100);    
     PANEL_Send_Message((uint8_t*)KEY_INIT_MSG, sizeof(KEY_INIT_MSG), 0xfffd);
-    HAL_Delay(100);
+    hal_delay_ms(100);
     PANEL_Send_Message(NULL, 0, 0xfffb);
-    HAL_Delay(100);
+    hal_delay_ms(100);
     // knight rider <3
     uint8_t i,j=0;
     for (j=0;j<2;j++)
@@ -200,18 +203,18 @@ void PANEL_Init(void)
             memset(Led_States, 0x0, LED_STATE_SIZE);
             PANEL_Set_LED(i, PANEL_LED_ON);
             PANEL_SendLEDMessage();
-            HAL_Delay(50);
+            hal_delay_ms(50);
         }
         for (i=11;i>=4;i--)
         {
             memset(Led_States, 0x0, LED_STATE_SIZE);
             PANEL_Set_LED(i, PANEL_LED_ON);
             PANEL_SendLEDMessage();
-            HAL_Delay(50);
+            hal_delay_ms(50);
         }
     }
     // all off
-    HAL_Delay(50);
+    hal_delay_ms(50);
     memset(Led_States, 0x0, LED_STATE_SIZE);    
     PANEL_SendLEDMessage();
 
@@ -280,8 +283,8 @@ void PANEL_Tick(void)
       Frame_Received_Panel=0;
      }
     /* add Start and Home at the end the tab*/
-    buttonstate[PANEL_BUTTON_DEF_START] = !HAL_GPIO_ReadPin(PLAY_BUTTON_PORT, PLAY_BUTTON_PIN); // pullup, active low    
-    buttonstate[PANEL_BUTTON_DEF_HOME]  = !HAL_GPIO_ReadPin(HOME_BUTTON_PORT, HOME_BUTTON_PIN); // pullup, active low    
+    buttonstate[PANEL_BUTTON_DEF_START] = !hal_gpio_read(BOARD_PLAY_BUTTON);
+    buttonstate[PANEL_BUTTON_DEF_HOME]  = !hal_gpio_read(BOARD_HOME_BUTTON); // pullup, active low    
     /* Click detected */
     if( (buttonstate[PANEL_BUTTON_DEF_START] != panel_u8OldStateButtonStart) && buttonstate[PANEL_BUTTON_DEF_START]){
         buttonupdated = 1;

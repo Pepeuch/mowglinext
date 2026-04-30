@@ -22,6 +22,7 @@ extern const hal_pin_t BOARD_STOP_BUTTON_WHITE;
 extern const hal_pin_t BOARD_WHEEL_LIFT_BLUE;
 extern const hal_pin_t BOARD_WHEEL_LIFT_RED;
 extern const hal_pin_t BOARD_PLAY_BUTTON;
+extern const hal_pin_t BOARD_HOME_BUTTON;
 #ifdef __cplusplus
 }
 #endif

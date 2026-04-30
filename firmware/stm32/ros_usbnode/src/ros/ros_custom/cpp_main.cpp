@@ -33,6 +33,7 @@
 #include "board_config.h"
 #include "nbt.h"
 #include "hal/hal_time.h"
+#include "robot_config.h"
 
 // USB CDC
 #include "usbd_cdc_if.h"
@@ -174,20 +175,20 @@ static void on_cmd_vel(const uint8_t *data, size_t len)
     const float wz = pkt->angular_z;
 
     /* Differential-drive inverse kinematics — per-wheel linear speed. */
-    float left_mps  = vx - wz * WHEEL_BASE * 0.5f;
-    float right_mps = vx + wz * WHEEL_BASE * 0.5f;
+    float left_mps  = vx - wz * ROBOT_WHEEL_BASE * 0.5f;
+    float right_mps = vx + wz * ROBOT_WHEEL_BASE * 0.5f;
 
-    if (left_mps  >  MAX_MPS) left_mps  =  MAX_MPS;
-    if (left_mps  < -MAX_MPS) left_mps  = -MAX_MPS;
-    if (right_mps >  MAX_MPS) right_mps =  MAX_MPS;
-    if (right_mps < -MAX_MPS) right_mps = -MAX_MPS;
+    if (left_mps  >  ROBOT_MAX_MPS) left_mps  =  ROBOT_MAX_MPS;
+    if (left_mps  < -ROBOT_MAX_MPS) left_mps  = -ROBOT_MAX_MPS;
+    if (right_mps >  ROBOT_MAX_MPS) right_mps =  ROBOT_MAX_MPS;
+    if (right_mps < -ROBOT_MAX_MPS) right_mps = -ROBOT_MAX_MPS;
 
     /* Convert to signed PWM in one step. Sign is preserved end-to-end; the
      * signed PWM carries both magnitude and direction. Deadband compensation
      * happens inside DRIVEMOTOR_SetSpeedSigned() when it runs at the fixed
      * motor-control cadence. */
-    left_pwm_signed  = (int16_t)(left_mps  * PWM_PER_MPS);
-    right_pwm_signed = (int16_t)(right_mps * PWM_PER_MPS);
+    left_pwm_signed  = (int16_t)(left_mps  * ROBOT_PWM_PER_MPS);
+    right_pwm_signed = (int16_t)(right_mps * ROBOT_PWM_PER_MPS);
 }
 
 static void on_hl_state(const uint8_t *data, size_t len)
@@ -428,16 +429,16 @@ extern "C" void wheelTicks_handler(
     prev_left_ticks  = p_s32LeftTicksSigned;
     prev_right_ticks = p_s32RightTicksSigned;
 
-    /* Velocity: mm/s = (delta_ticks / TICKS_PER_M) * (1000 / dt_ms) * 1000
-     *                = delta_ticks * 1e6 / (TICKS_PER_M * dt_ms).
-     * TICKS_PER_M is 300, so the constant numerator (300 * dt_ms) stays
+    /* Velocity: mm/s = (delta_ticks / ROBOT_TICKS_PER_M) * (1000 / dt_ms) * 1000
+     *                = delta_ticks * 1e6 / (ROBOT_TICKS_PER_M * dt_ms).
+     * ROBOT_TICKS_PER_M is 300, so the constant numerator (300 * dt_ms) stays
      * comfortably inside int32 for any realistic dt. We still cast to
      * int64 for the mul to be safe on large tick deltas.                  */
     int16_t left_v_mm_s  = 0;
     int16_t right_v_mm_s = 0;
     if (dt_ms > 0)
     {
-        const int64_t denom = (int64_t)TICKS_PER_M * (int64_t)dt_ms;
+        const int64_t denom = (int64_t)ROBOT_TICKS_PER_M * (int64_t)dt_ms;
         int64_t v_l = ((int64_t)delta_left  * 1000000LL) / denom;
         int64_t v_r = ((int64_t)delta_right * 1000000LL) / denom;
         if (v_l >  32767) v_l =  32767;

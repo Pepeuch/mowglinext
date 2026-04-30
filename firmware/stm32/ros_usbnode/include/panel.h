@@ -1,7 +1,6 @@
 #ifndef __PANEL_H
 #define __PANEL_H
 
-#include "board.h"
 #include "stm32f_board_hal.h"
 
 

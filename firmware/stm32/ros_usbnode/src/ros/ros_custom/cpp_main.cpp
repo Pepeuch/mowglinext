@@ -34,6 +34,7 @@
 #include "nbt.h"
 #include "hal/hal_time.h"
 #include "robot_config.h"
+#include "motor_backend.h"
 
 // USB CDC
 #include "usbd_cdc_if.h"
@@ -185,7 +186,7 @@ static void on_cmd_vel(const uint8_t *data, size_t len)
 
     /* Convert to signed PWM in one step. Sign is preserved end-to-end; the
      * signed PWM carries both magnitude and direction. Deadband compensation
-     * happens inside DRIVEMOTOR_SetSpeedSigned() when it runs at the fixed
+     * happens inside motor_set_drive_pwm() when it runs at the fixed
      * motor-control cadence. */
     left_pwm_signed  = (int16_t)(left_mps  * ROBOT_PWM_PER_MPS);
     right_pwm_signed = (int16_t)(right_mps * ROBOT_PWM_PER_MPS);
@@ -324,7 +325,7 @@ extern "C" void motors_handler()
         blade_on_off = snap_target_blade;
 
         if (Emergency_State()) {
-            DRIVEMOTOR_SetSpeedSigned(0, 0);
+            motor_set_drive_pwm(0, 0);
             blade_on_off = 0;
         } else {
             const uint32_t cmd_vel_age_ms = hal_millis() - snap_cmd_vel;
@@ -332,9 +333,9 @@ extern "C" void motors_handler()
             if (cmd_vel_age_ms > 200u) {
                 /* Command-vel watchdog: zero motors if the host hasn't
                  * sent a twist in 200 ms (Pi hang, USB glitch, etc). */
-                DRIVEMOTOR_SetSpeedSigned(0, 0);
+                motor_set_drive_pwm(0, 0);
             } else {
-                DRIVEMOTOR_SetSpeedSigned(snap_left_pwm, snap_right_pwm);
+                motor_set_drive_pwm(snap_left_pwm, snap_right_pwm);
             }
 
             if (cmd_vel_age_ms > 25000u) {
@@ -348,7 +349,7 @@ extern "C" void motors_handler()
             Emergency_SetState(1);
         }
 
-        BLADEMOTOR_Set(blade_on_off, blade_direction);
+        motor_set_blade_pwm(blade_on_off ? (blade_direction ? -1000 : 1000) : 0);
     }
 }
 

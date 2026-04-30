@@ -27,6 +27,8 @@ extern const hal_pin_t BOARD_PERIMETER_COIL_A;
 extern const hal_pin_t BOARD_PERIMETER_COIL_B;
 extern const hal_pin_t BOARD_DRIVE_RESET;
 extern const hal_pin_t BOARD_BLADE_RESET;
+extern const hal_pin_t BOARD_HALLSTOP_LEFT;
+extern const hal_pin_t BOARD_HALLSTOP_RIGHT;
 #ifdef __cplusplus
 }
 #endif

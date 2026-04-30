@@ -20,8 +20,12 @@
 #include <math.h>
 #include <string.h>
 #include "stm32f_board_hal.h"
+#include "hal/hal_gpio.h"
+#include "hal/hal_time.h"
+#include "hal/hal_uart.h"
 #include "main.h"
 // stm32 custom
+#include "board_config.h"
 #include "board.h"
 #include "panel.h"
 #include "panel.h"
@@ -180,8 +184,8 @@ int main(void)
   ULTRASONICSENSOR_Init();
 #endif
 
-  HAL_GPIO_WritePin(LED_GPIO_PORT, LED_PIN, 0);
-  HAL_GPIO_WritePin(TF4_GPIO_PORT, TF4_PIN, 1);
+  hal_gpio_write(BOARD_STATUS_LED, false);
+  hal_gpio_write(BOARD_TF4_SWITCH, true);
 
   // Initialize Main Timers
   NBT_init(&main_chargecontroller_nbt, 10);
@@ -404,9 +408,10 @@ void LED_Init()
  * @brief Poll RAIN Sensor
  * @retval 1 if rain is detected, 0 if no rain
  */
+
 int RAIN_Sense(void)
 {
-  return (!HAL_GPIO_ReadPin(RAIN_SENSOR_PORT, RAIN_SENSOR_PIN)); // pullup, active low
+  return (!hal_gpio_read(BOARD_RAIN_SENSOR));
 }
 
 /**
@@ -830,7 +835,7 @@ void StatusLEDUpdate(void)
     PANEL_Set_LED(PANEL_LED_BATTERY_LOW, PANEL_LED_OFF); // bat ok
   }
 
-  HAL_GPIO_TogglePin(LED_GPIO_PORT, LED_PIN); // flash LED
+  hal_gpio_write(BOARD_STATUS_LED, !hal_gpio_read(BOARD_STATUS_LED)); // flash LED
 }
 
 /*

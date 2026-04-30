@@ -17,6 +17,7 @@
 #include <stdlib.h>
 
 #include "stm32f_board_hal.h"
+#include "hal/hal_uart.h"
 
 #include "main.h"
 #include "ros/ros_custom/cpp_main.h"
@@ -25,6 +26,10 @@
 
 #include "drivemotor.h"
 
+UART_HandleTypeDef DRIVE_USART_Handler;
+DMA_HandleTypeDef hdma_usart2_rx;
+DMA_HandleTypeDef hdma_usart2_tx;
+static hal_uart_t DRIVE_UART = { &DRIVE_USART_Handler };
 /******************************************************************************
  * Module Preprocessor Constants
  *******************************************************************************/
@@ -263,7 +268,7 @@ void DRIVEMOTOR_App_10ms(void)
     {
     case DRIVEMOTOR_INIT_1:
 
-        HAL_UART_Transmit_DMA(&DRIVEMOTORS_USART_Handler, (uint8_t *)drivemotor_pcu8InitMsg, DRIVEMOTOR_LENGTH_INIT_MSG);
+        hal_uart_tx_dma(&DRIVE_UART, (uint8_t *)drivemotor_pcu8InitMsg, DRIVEMOTOR_LENGTH_INIT_MSG);
         drivemotor_eState = DRIVEMOTOR_RUN;
         debug_printf(" * Drive Motor Controller initialized\r\n");
         break;
@@ -314,7 +319,7 @@ void DRIVEMOTOR_App_10ms(void)
             }
         }
 
-        HAL_UART_Transmit_DMA(&DRIVEMOTORS_USART_Handler, (uint8_t *)drivemotor_pu8RqstMessage, DRIVEMOTOR_LENGTH_RQST_MSG);
+        hal_uart_tx_dma(&DRIVE_UART, (uint8_t *)drivemotor_pu8RqstMessage, DRIVEMOTOR_LENGTH_RQST_MSG);
 
         break;
 
@@ -322,7 +327,7 @@ void DRIVEMOTOR_App_10ms(void)
         /* prepare to receive the message before to launch the command */
         HAL_UART_Receive_DMA(&DRIVEMOTORS_USART_Handler, (uint8_t *)&drivemotor_psReceivedData, sizeof(DRIVEMOTORS_data_t));
         drivemotor_prepareMsg(100, 100, 0, 0); /* set to -0.33m/s  */
-        HAL_UART_Transmit_DMA(&DRIVEMOTORS_USART_Handler, (uint8_t *)drivemotor_pu8RqstMessage, DRIVEMOTOR_LENGTH_RQST_MSG);
+        hal_uart_tx_dma(&DRIVE_UART, (uint8_t *)drivemotor_pu8RqstMessage, DRIVEMOTOR_LENGTH_RQST_MSG);
 
         if ((HAL_GetTick() - l_u32Timestamp) > 2000)
         {
@@ -336,7 +341,7 @@ void DRIVEMOTOR_App_10ms(void)
         /* prepare to receive the message before to launch the command */
         HAL_UART_Receive_DMA(&DRIVEMOTORS_USART_Handler, (uint8_t *)&drivemotor_psReceivedData, sizeof(DRIVEMOTORS_data_t));
         drivemotor_prepareMsg(0, 0, 0, 0);
-        HAL_UART_Transmit_DMA(&DRIVEMOTORS_USART_Handler, (uint8_t *)drivemotor_pu8RqstMessage, DRIVEMOTOR_LENGTH_RQST_MSG);
+        hal_uart_tx_dma(&DRIVE_UART, (uint8_t *)drivemotor_pu8RqstMessage, DRIVEMOTOR_LENGTH_RQST_MSG);
 
         if ((HAL_GetTick() - l_u32Timestamp) > 1000)
         {

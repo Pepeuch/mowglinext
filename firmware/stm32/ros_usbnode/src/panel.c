@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "stm32f_board_hal.h"
+#include "hal/hal_uart.h"
 
 #include "panel.h"
 #include "board.h"
@@ -24,6 +25,8 @@
 #define PANEL_LENGTH_RECEIVED_MSG 20
 
 void PANEL_SendLEDMessage(void);
+
+static hal_uart_t PANEL_UART = { &PANEL_USART_Handler};
 
 UART_HandleTypeDef PANEL_USART_Handler;
 DMA_HandleTypeDef hdma_uart1_rx;
@@ -324,7 +327,7 @@ void PANEL_SendLEDMessage(void){
     panel_pu8RqstMessage[ptr++] = crcCalc(&panel_pu8RqstMessage[ptr_beginScndMsg],8); 
 
 #ifdef PANEL_USART_ENABLED
-    HAL_UART_Transmit_DMA(&PANEL_USART_Handler, (uint8_t*)&panel_pu8RqstMessage[0], ptr); 
+    hal_uart_tx_dma(&PANEL_UART, (uint8_t*)&panel_pu8RqstMessage[0], ptr); 
 #endif
 
 }
@@ -355,7 +358,7 @@ void PANEL_Send_Message(uint8_t *data, uint8_t dataLength, uint16_t command)
 
     
 #ifdef PANEL_USART_ENABLED
-    HAL_UART_Transmit_DMA(&PANEL_USART_Handler, (uint8_t*)&panel_pu8RqstMessage[0], dataLength + 6); 
+    hal_uart_tx_dma(&PANEL_UART, (uint8_t*)&panel_pu8RqstMessage[0], dataLength + 6); 
 #endif
 }
 

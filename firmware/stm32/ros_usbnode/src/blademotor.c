@@ -17,12 +17,17 @@
 #include <stdbool.h>
 
 #include "stm32f_board_hal.h"
+#include "hal/hal_uart.h"
 
 #include "main.h"
 #include "board.h"
 
 #include "blademotor.h" 
 
+UART_HandleTypeDef BLADE_USART_Handler;
+DMA_HandleTypeDef hdma_uart_blade_rx;
+DMA_HandleTypeDef hdma_uart_blade_tx;
+static hal_uart_t BLADE_UART = { &BLADE_USART_Handler };
 /******************************************************************************
 * Module Preprocessor Constants
 *******************************************************************************/
@@ -217,7 +222,7 @@ void  BLADEMOTOR_App(void){
     {
     case BLADEMOTOR_INIT_1:
 
-        HAL_UART_Transmit_DMA(&BLADEMOTOR_USART_Handler, (uint8_t*)blademotor_pcu8InitMsg, BLADEMOTOR_LENGTH_INIT_MSG);
+        hal_uart_tx_dma(&BLADE_UART, (uint8_t*)blademotor_pcu8InitMsg, BLADEMOTOR_LENGTH_INIT_MSG);
         blademotor_eState = BLADEMOTOR_RUN;
         debug_printf(" * Blade Motor Controller initialized\r\n");     
         break;
@@ -233,7 +238,7 @@ void  BLADEMOTOR_App(void){
         /* prepare to receive the message before to launch the command */        
         HAL_UART_Receive_DMA(&BLADEMOTOR_USART_Handler, blademotor_pu8ReceivedData, BLADEMOTOR_LENGTH_RECEIVED_MSG);
                   
-        HAL_UART_Transmit_DMA(&BLADEMOTOR_USART_Handler, (uint8_t*)blademotor_pu8RqstMessage, BLADEMOTOR_LENGTH_RQST_MSG);    
+        hal_uart_tx_dma(&BLADE_UART, (uint8_t*)blademotor_pu8RqstMessage, BLADEMOTOR_LENGTH_RQST_MSG);    
         break;
     
     default:

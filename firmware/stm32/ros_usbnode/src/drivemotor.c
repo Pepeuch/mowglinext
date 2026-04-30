@@ -23,6 +23,8 @@
 #include "ros/ros_custom/cpp_main.h"
 #include "board.h"
 #include "adc.h"
+#include "hal/hal_gpio.h"
+#include "board_config.h"
 
 #include "drivemotor.h"
 
@@ -145,7 +147,7 @@ void DRIVEMOTOR_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
     HAL_GPIO_Init(PAC5210RESET_GPIO_PORT, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(PAC5210RESET_GPIO_PORT, PAC5210RESET_PIN, 0); // take Drive Motor PAC out of reset if LOW
+    hal_gpio_write(BOARD_DRIVE_RESET, false); // take Drive Motor PAC out of reset if LOW
 
     // PD7 (->PAC5210 PC4), PD8 (->PAC5210 PC3)
     __HAL_RCC_GPIOD_CLK_ENABLE();

@@ -18,7 +18,8 @@
 
 #include "stm32f_board_hal.h"
 #include "hal/hal_uart.h"
-
+#include "hal/hal_gpio.h"
+#include "board_config.h"
 #include "main.h"
 #include "board.h"
 
@@ -104,7 +105,7 @@ void BLADEMOTOR_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
     HAL_GPIO_Init(PAC5223RESET_GPIO_PORT, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(PAC5223RESET_GPIO_PORT, PAC5223RESET_PIN, 1);     /* take Blade PAC out of reset if HIGH */
+    hal_gpio_write(BOARD_BLADE_RESET, true);     /* take Blade PAC out of reset if HIGH */
 
     // enable port and usart clocks
     BLADEMOTOR_USART_GPIO_CLK_ENABLE();

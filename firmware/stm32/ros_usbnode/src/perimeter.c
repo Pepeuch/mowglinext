@@ -18,6 +18,8 @@
 #include "perimeter.h" 
 #include <math.h>
 #include <stdlib.h>
+#include "hal/hal_gpio.h"
+#include "board_config.h"
 
 #ifdef OPTION_PERIMETER
 
@@ -340,27 +342,27 @@ void perimeter_SetCoil(perimeter_CoilNumber_e idx){
   {
   case COIL_RIGHT:
     {
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+    hal_gpio_write(BOARD_PERIMETER_COIL_A, false);
+    hal_gpio_write(BOARD_PERIMETER_COIL_B, false);
     break;
     }
   case COIL_MIDDLE:
     {
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+    hal_gpio_write(BOARD_PERIMETER_COIL_A, true);
+    hal_gpio_write(BOARD_PERIMETER_COIL_B, false);
     break;
     }
   case COIL_LEFT:
     {
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+    hal_gpio_write(BOARD_PERIMETER_COIL_A, false);
+    hal_gpio_write(BOARD_PERIMETER_COIL_B, true);
     break;
     }
   case COIL_OFF:
   default:
     {
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+    hal_gpio_write(BOARD_PERIMETER_COIL_A, true);
+    hal_gpio_write(BOARD_PERIMETER_COIL_B, true);
     break;
     }
 

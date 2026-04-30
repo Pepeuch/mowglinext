@@ -77,8 +77,9 @@ uint8_t do_chirp = 0;
 
 openmower_status_e main_eOpenmowerStatus = OPENMOWER_STATUS_IDLE;
 
-#if BOARD_YARDFORCE500_VARIANT_ORIG
-UART_HandleTypeDef MASTER_USART_Handler; // UART  Handle
+#if BOARD_HAS_MASTER_USART
+UART_HandleTypeDef MASTER_USART_Handler; // UART Handle
+static hal_uart_t MASTER_UART = { &MASTER_USART_Handler };
 #endif
 
 // Drive Motors DMA
@@ -92,7 +93,8 @@ WWDG_HandleTypeDef WwdgHandle = {0};
 #if DB_ACTIVE
 int debug_assert(int condition, const char *msg)
 {
-  if (condition){
+  if (condition)
+  {
     return 0;
   }
   debug_printf(msg);
@@ -275,7 +277,7 @@ int main(void)
         uint32_t currentTick;
         static uint32_t old_tick;
         DB_TRACE(" temp : %.2f \n", blade_temperature);
-        currentTick = HAL_GetTick();
+        currentTick = hal_millis();
         DB_TRACE(" Current ticktime: %d    \r", (currentTick - old_tick));
         old_tick = currentTick;
       }
@@ -880,10 +882,10 @@ void chirp(uint8_t count)
   {
     TIM3_Handle.Instance->CCR4 = 10;
     TIM4_Handle.Instance->CCR3 = 10;
-    HAL_Delay(100);
+    hal_delay_ms(100);
     TIM3_Handle.Instance->CCR4 = 0;
     TIM4_Handle.Instance->CCR3 = 0;
-    HAL_Delay(50);
+    hal_delay_ms(50);
   }
 }
 
@@ -893,7 +895,7 @@ void chirp(uint8_t count)
 void vprint(const char *fmt, va_list argp)
 {
   char string[200];
-  if (0 < vsnprintf(string, sizeof(string), fmt, argp)) // build string
+  if (0 < vsnprintf(string, sizeof(string), fmt, argp))
   {
 #if DEBUG_TYPE == DEBUG_TYPE_SWO
     for (int i = 0; i < strlen(string); i++)
@@ -901,10 +903,10 @@ void vprint(const char *fmt, va_list argp)
       ITM_SendChar(string[i]);
     }
 #elif DEBUG_TYPE == DEBUG_TYPE_UART
-#if BOARD_YARDFORCE500_VARIANT_ORIG
+#if BOARD_HAS_MASTER_USART
     MASTER_Transmit((unsigned char *)string, strlen(string));
 #else
-#error "This board does not suport debugging via UART"
+#error "This board does not support debugging via UART"
 #endif
 #endif
   }
@@ -921,24 +923,28 @@ void debug_printf(const char *fmt, ...)
   va_end(argp);
 }
 
-#if BOARD_HAS_MASTER_USART
 /*
  * Send message via MASTER USART (DMA Normal Mode)
  */
 void MASTER_Transmit(uint8_t *buffer, uint8_t len)
 {
+#if BOARD_HAS_MASTER_USART
   // wait until tx buffers are free (send complete)
   while (master_tx_busy)
   {
   }
+
   master_tx_busy = 1;
+
   // copy into our master_tx_buffer
   master_tx_buffer_len = len;
   memcpy(master_tx_buffer, buffer, master_tx_buffer_len);
-  HAL_UART_Transmit_DMA(&MASTER_USART_Handler, (uint8_t *)master_tx_buffer, master_tx_buffer_len); // send message via UART
-}
+  hal_uart_tx_dma(&MASTER_UART, (uint8_t *)master_tx_buffer, master_tx_buffer_len);
+#else
+  (void)buffer;
+  (void)len;
 #endif
-
+}
 /*
  * Initialize Watchdog - not tested yet (by Nekraus)
  */
@@ -975,7 +981,7 @@ static void WATCHDOG_vInit(void)
   WwdgHandle.Init.Prescaler = WWDG_PRESCALER_8;
   WwdgHandle.Init.Counter = 0x7F; /* 40.02 ms*/
   WwdgHandle.Init.Window = 0x7F;  /* 0ms */
-  if( HAL_WWDG_Init(&WwdgHandle) != HAL_OK )
+  if (HAL_WWDG_Init(&WwdgHandle) != HAL_OK)
   {
 #ifdef DB_ACTIVE
     DB_TRACE(" WWDG init Error\r\n");
@@ -1050,7 +1056,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   }
   else
 #endif
-  if (huart->Instance == BLADEMOTOR_USART_INSTANCE)
+      if (huart->Instance == BLADEMOTOR_USART_INSTANCE)
   {
     BLADEMOTOR_ReceiveIT();
   }

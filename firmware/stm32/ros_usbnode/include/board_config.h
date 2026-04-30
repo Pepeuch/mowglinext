@@ -16,6 +16,12 @@ extern const hal_pwm_t BOARD_PWM_BEEPER;
 extern const hal_pwm_t BOARD_PWM_BUZZER;
 extern const hal_pin_t BOARD_SOFT_I2C_SCL;
 extern const hal_pin_t BOARD_SOFT_I2C_SDA;
+extern const hal_pin_t BOARD_TILT;
+extern const hal_pin_t BOARD_STOP_BUTTON_YELLOW;
+extern const hal_pin_t BOARD_STOP_BUTTON_WHITE;
+extern const hal_pin_t BOARD_WHEEL_LIFT_BLUE;
+extern const hal_pin_t BOARD_WHEEL_LIFT_RED;
+extern const hal_pin_t BOARD_PLAY_BUTTON;
 #ifdef __cplusplus
 }
 #endif

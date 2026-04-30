@@ -22,6 +22,9 @@
 #include "board.h"
 #include "main.h"
 #include "i2c.h"
+#include "hal/hal_gpio.h"
+#include "hal/hal_time.h"
+#include "board_config.h"
 
 //#define EMERGENCY_DEBUG 1
 
@@ -73,7 +76,7 @@ void  Emergency_SetState(uint8_t new_emergency_state)
  */
 int Emergency_Tilt(void)
 {
-   return(HAL_GPIO_ReadPin(TILT_PORT, TILT_PIN));
+   return(hal_gpio_read(BOARD_TILT));
 }
 
 /**
@@ -82,7 +85,7 @@ int Emergency_Tilt(void)
  */
 int Emergency_StopButtonYellow(void)
 {
-   return(HAL_GPIO_ReadPin(STOP_BUTTON_YELLOW_PORT, STOP_BUTTON_YELLOW_PIN));
+   return(hal_gpio_read(BOARD_STOP_BUTTON_YELLOW));
 }
 
 /**
@@ -91,7 +94,7 @@ int Emergency_StopButtonYellow(void)
  */
 int Emergency_StopButtonWhite(void)
 {
-   return(HAL_GPIO_ReadPin(STOP_BUTTON_WHITE_PORT, STOP_BUTTON_WHITE_PIN));
+   return(hal_gpio_read(BOARD_STOP_BUTTON_WHITE));
 }
 
 /**
@@ -100,7 +103,7 @@ int Emergency_StopButtonWhite(void)
  */
 int Emergency_WheelLiftBlue(void)
 {
-   return(HAL_GPIO_ReadPin(WHEEL_LIFT_BLUE_PORT, WHEEL_LIFT_BLUE_PIN));
+   return(hal_gpio_read(BOARD_WHEEL_LIFT_BLUE));
 }
 
 /**
@@ -109,7 +112,7 @@ int Emergency_WheelLiftBlue(void)
  */
 int Emergency_WheelLiftRed(void)
 {
-   return(HAL_GPIO_ReadPin(WHEEL_LIFT_RED_PORT, WHEEL_LIFT_RED_PIN));
+   return(hal_gpio_read(BOARD_WHEEL_LIFT_RED));
 }
 
 
@@ -132,7 +135,7 @@ void EmergencyController(void)
     uint8_t wheel_lift_blue = Emergency_WheelLiftBlue();
     uint8_t wheel_lift_red = Emergency_WheelLiftRed();
     uint8_t tilt = Emergency_Tilt();
-    GPIO_PinState play_button = !HAL_GPIO_ReadPin(PLAY_BUTTON_PORT, PLAY_BUTTON_PIN); // pullup, active low    
+    bool play_button = !hal_gpio_read(BOARD_PLAY_BUTTON);
     uint8_t accelerometer_int_triggered = Emergency_LowZAccelerometer();
 
     uint32_t now = HAL_GetTick();

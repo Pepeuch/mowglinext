@@ -5,6 +5,7 @@
 #include "stm32f_board_hal.h"
 #include "usbd_cdc_if.h"
 #include "ringbuffer.h"
+#include "hal/hal_time.h"
 
 extern struct ringbuffer rb;
 extern USBD_HandleTypeDef hUsbDeviceFS;
@@ -45,7 +46,7 @@ public:
 	// Returns milliseconds since start of program
 	unsigned long time(void)
 	{
-		return HAL_GetTick();
+		return hal_millis();
 	}
 
 };
